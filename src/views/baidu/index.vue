@@ -42,7 +42,7 @@
 <script>
 // eslint-disable-next-line no-unused-vars
 import BaiduMap from "vue-baidu-map-3x";
-import { baiduGenGrid3, baiduGenGrid4 } from "@/apis/baidu";
+import { baiduGenGrid } from "@/apis/baidu";
 export default {
   name: 'BaiduGrid',
   data() {
@@ -61,10 +61,18 @@ export default {
         lat: ''
       },
       data: [],
-      map: "",
+      layer: undefined,
       zoom: 13,
       scale: 16,
       mapType: "BMAP_SATELLITE_MAP",
+      options: {
+        fillStyle: "white",
+        strokeStyle: "yellow",
+        size: 3,
+        lineWidth: 1,
+        draw: "simple",
+        globalAlpha: 0.5,
+      },
       rules: {
         lng1: [
           {required: true, message: '不能为空', trigger: 'blur'}
@@ -84,11 +92,25 @@ export default {
       }
     };
   },
+
   created(){
-    // this.handler()
+    this.getData()
   },
+
   methods: {
+    async getData(){
+      const _this = this
+      let params = {
+        bounds: [_this.params.bounds.lng1, _this.params.bounds.lat1, _this.params.bounds.lng2, _this.params.bounds.lat2],
+        accuracy: _this.params.accuracy
+      };
+      await baiduGenGrid(params).then(re=>{
+        _this.data = re.data
+      })
+    },
+
     handler({BMap, map}) {
+      const _this = this
       map = new BMap.Map("map", {
         enableMapClick: false
       })
@@ -96,21 +118,12 @@ export default {
       map.enableScrollWheelZoom(true);
       // eslint-disable-next-line no-undef
       const mapv = require("mapv");
-      baiduGenGrid3().then((re) => {
-        const grid = re.data;
-        const dataSet = new mapv.DataSet(grid);
-        const options = {
-          fillStyle: "white",
-          strokeStyle: "yellow",
-          size: 3,
-          lineWidth: 1,
-          draw: "simple",
-          globalAlpha: 0.5,
-        };
-        // eslint-disable-next-line no-unused-vars
-        const mapvLayer = new mapv.baiduMapLayer(map, dataSet, options);
-      });
+      const grid = _this.data;
+      const dataSet = new mapv.DataSet(grid);
+      // eslint-disable-next-line no-unused-vars
+      _this.layer = new mapv.baiduMapLayer(map, dataSet, _this.options);
     },
+
     getMapCenter(e) {
       this.lng = e.target.getCenter().lng;
       this.lat = e.target.getCenter().lat;
@@ -118,23 +131,25 @@ export default {
         this.mapType = "BMAP_SATELLITE_MAP";
       }
     },
-    handlerGenBaiduGrid() {
-      if (this.params.accuracy < 0) {
-          this.$message({
+
+    async handlerGenBaiduGrid() {
+      const _this = this
+      if (_this.params.accuracy < 0) {
+          _this.$message({
             message: '栅格精确度不能小于0',
             type: 'warning'
           })
       }
-      let params = {
-        bounds: [this.params.bounds.lng1, this.params.bounds.lat1, this.params.bounds.lng2, this.params.bounds.lat2],
-        accuracy: this.params.accuracy
+      const params = {
+        bounds: [_this.params.bounds.lng1, _this.params.bounds.lat1, _this.params.bounds.lng2, _this.params.bounds.lat2],
+        accuracy: _this.params.accuracy
       }
-      baiduGenGrid4(params).then(re=>{
-        
-        
+      baiduGenGrid(params).then(re=>{
+        _this.layer.dataSet.set(re.data)
       })
     }
-  },
+
+  }
 };
 </script>
 <style>

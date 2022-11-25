@@ -1,27 +1,6 @@
 import request from "@/utils/request";
 
-export function baiduGenGrid(){
-    return request({
-        url: '/api/baidu/grid',
-        method: 'get'
-    })
-}
-
-export function baiduGenGrid2() {
-    return request({
-        url: '/api/baidu/v2/grid/',
-        method: 'get'
-    })
-}
-
-export function baiduGenGrid3() {
-    return request({
-        url: '/api/baidu/v3/grid',
-        method: 'get'
-    })
-}
-
-export function baiduGenGrid4(params) {
+export function baiduGenGrid(params){
     return request({
         url: '/api/baidu/v4/grid',
         headers: {
