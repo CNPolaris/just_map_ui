@@ -18,3 +18,14 @@ export function getPath(){
         method: 'get'
     })
 }
+
+export function uploadPoints(data){
+    return request({
+        url: '/api/baidu/upload/points',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        method: 'post',
+        data: data
+    })
+}
